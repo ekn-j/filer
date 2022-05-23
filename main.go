@@ -60,9 +60,9 @@ func checkExt(ext string) string {
 	//"/home/johannes/github.com/ekn-j/filer/dl_docs/"
 
 	if docsChecker(ext) {
-		return imgDir
-	} else if imgChecker(ext) {
 		return docDir
+	} else if imgChecker(ext) {
+		return imgDir
 	}
 	return ""
 }
@@ -84,19 +84,14 @@ func listDirs() []string {
 	}
 	return lsd
 }
-func dirChecker(dir string) {
+func dirChecker() {
 	dirs := getDlDirs()
-	//	path := dlPath()
-
 	for _, d := range dirs {
-		if d == dir {
-			err := os.Mkdir(dir, 0750)
-			if err != nil && !os.IsExist(err) {
-				log.Fatal(err)
-			}
-			fmt.Println("Directory created ", dir)
+		if err := os.Mkdir(d, os.ModePerm); err != nil {
+			fmt.Println("Directory present: ", err)
 		}
 	}
+
 }
 
 func dlPath() string {
@@ -113,7 +108,6 @@ func dlPath() string {
 
 func main() {
 
-	println(os.Getwd())
 	dlDir := dlPath()
 	err := os.Chdir(dlDir)
 	if err != nil {
@@ -123,25 +117,19 @@ func main() {
 	println("current working dir is: ", dlDir)
 
 	fmt.Println("Check for existing dirs: ")
-	dirs := listDirs()
-	for _, d := range dirs {
-		dirChecker(d)
-	}
+	dirChecker()
 
-	//fmt.Println("listing files: ", listFiles(dlDir))
+	fmt.Println("listing files: ", listFiles(dlDir))
 
-	files, err := os.ReadDir(dlDir)
+	files, err := os.ReadDir(".")
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, file := range files {
 		ext := filepath.Ext(file.Name())
 		dir := checkExt(ext)
-		os.Rename(dlDir+file.Name(), dir+file.Name())
+		fmt.Println(os.Rename(dlDir+"/"+file.Name(), dir+file.Name()))
 	}
 
-	if err := os.Mkdir("test", os.ModePerm); err != nil {
-		log.Fatal(err)
-	}
 	println(os.Getwd())
 }
