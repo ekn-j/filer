@@ -54,8 +54,10 @@ func docsChecker(ext string) bool {
 
 //Need to add integrations with directory func
 func checkExt(ext string) string {
-	imgDir := "/home/johannes/github.com/ekn-j/filer/dl_images/"
-	docDir := "/home/johannes/github.com/ekn-j/filer/dl_docs/"
+	imgDir := dlPath() + "/dl_images/"
+	//"/home/johannes/github.com/ekn-j/filer/dl_images/"
+	docDir := dlPath() + "/dl_docs/"
+	//"/home/johannes/github.com/ekn-j/filer/dl_docs/"
 
 	if docsChecker(ext) {
 		return imgDir
@@ -84,13 +86,15 @@ func listDirs() []string {
 }
 func dirChecker(dir string) {
 	dirs := getDlDirs()
+	//	path := dlPath()
+
 	for _, d := range dirs {
 		if d == dir {
-			err := os.Mkdir(d, 0750)
+			err := os.Mkdir(dir, 0750)
 			if err != nil && !os.IsExist(err) {
 				log.Fatal(err)
 			}
-			fmt.Println("Directory created ", d)
+			fmt.Println("Directory created ", dir)
 		}
 	}
 }
@@ -102,14 +106,30 @@ func dlPath() string {
 }
 
 //func moveFiles(ext string) {
-//	dlDir := dlPath()
-//
+//dlDir := dlPath()
+//os.Rename(dlDir+ext,)
+
 //}
 
 func main() {
-	dlDir := dlPath()
 
-	fmt.Println("listing files: ", listFiles(dlDir))
+	println(os.Getwd())
+	dlDir := dlPath()
+	err := os.Chdir(dlDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+	dlDir, err = os.Getwd()
+	println("current working dir is: ", dlDir)
+
+	fmt.Println("Check for existing dirs: ")
+	dirs := listDirs()
+	for _, d := range dirs {
+		dirChecker(d)
+	}
+
+	//fmt.Println("listing files: ", listFiles(dlDir))
+
 	files, err := os.ReadDir(dlDir)
 	if err != nil {
 		log.Fatal(err)
@@ -117,14 +137,11 @@ func main() {
 	for _, file := range files {
 		ext := filepath.Ext(file.Name())
 		dir := checkExt(ext)
-		fmt.Println(os.Rename(dlDir+file.Name(), dir+file.Name()))
+		os.Rename(dlDir+file.Name(), dir+file.Name())
 	}
-	fmt.Println(os.UserHomeDir())
-	home, _ := os.UserHomeDir()
-	downloads := "/Downloads"
-	fmt.Println(home + downloads)
-	dlPath := home + downloads
-	fmt.Println(listFiles(dlPath))
-	listDirs()
 
+	if err := os.Mkdir("test", os.ModePerm); err != nil {
+		log.Fatal(err)
+	}
+	println(os.Getwd())
 }
